@@ -51,6 +51,9 @@ public class Server {
 
 
     }
+    private void proccesRequest(BufferedReader in, BufferedOutputStream out) {
+
+    }
 
 
 }
