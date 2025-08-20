@@ -7,23 +7,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Handler;
 
 public class Server {
-    private final int port;
-    private final List<String> validPaths;
+    private final Map<String, Map<String, Handler>> handlers;
     private final ExecutorService threadPool;
     private volatile boolean isRunning;
 
-    public Server(int port, List<String> validPaths) {
-        this.port = port;
-        this.validPaths = validPaths;
+    public Server() {
+        this.handlers = new ConcurrentHashMap<>();
         this.threadPool = Executors.newFixedThreadPool(64);
         this.isRunning = false;
     }
 
-    public void start() {
+    public void listen(int port) {
         isRunning = true;
         try (final var serverSocket = new ServerSocket(port)) {
             System.out.println("Сервер запущен на порту " + port);
