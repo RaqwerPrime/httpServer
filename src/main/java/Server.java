@@ -63,6 +63,12 @@ public class Server {
 
     private void servStatFile(Path filePath, String mimeType, BufferedOutputStream out) {
 
+
+    }
+
+    private void servDynamicContent(BufferedOutputStream out, int statusCode, String statusMsg) {
+
+
     }
 
 
