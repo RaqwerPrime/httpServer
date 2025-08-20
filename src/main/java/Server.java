@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,6 +57,11 @@ public class Server {
     }
 
     private void servFile(String path, BufferedOutputStream out) {
+
+
+    }
+
+    private void servStatFile(Path filePath, String mimeType, BufferedOutputStream out) {
 
     }
 
