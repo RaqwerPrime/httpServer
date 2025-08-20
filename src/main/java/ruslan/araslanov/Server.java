@@ -173,6 +173,16 @@ public class Server {
             this.headers = Collections.unmodifiableMap(new HashMap<>(headers));
             this.body = body;
         }
+        public String getMethod() {return method;}
+        public String getPath() {return path;}
+        public Map<String,String> getHeaders() {return headers;}
+        public String getBody() {return body;}
+        public String getHeader(String name) {return headers.get(name);}
+    }
+
+    @FunctionalInterface
+    public interface Handler {
+         void handle(Request request, BufferedOutputStream responseStream) throws IOException;
     }
 
 }
