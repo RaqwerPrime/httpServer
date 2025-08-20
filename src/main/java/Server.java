@@ -75,5 +75,9 @@ public class Server {
 
     }
 
+    private String buildHeaders(int statusCode, String statusMessage, String contentType, long contentLength) {
+
+    }
+
 
 }
