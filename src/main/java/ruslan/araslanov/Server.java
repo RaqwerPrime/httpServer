@@ -6,6 +6,8 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +26,8 @@ public class Server {
         this.isRunning = false;
     }
 
-    public void addHandler() {
+    public void addHandler(String method, String path , Handler handler) {
+        handlers.computeIfAbsent(method, k -> new ConcurrentHashMap<>()).put(path, handler);
 
     }
 
@@ -57,7 +60,7 @@ public class Server {
         threadPool.shutdown();
     }
 
-    private void Connection(Socket socket) {
+    private void handleConnection(Socket socket) {
         try (final var in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              final var out = new BufferedOutputStream(socket.getOutputStream())) {
             proccesRequest(in, out);
@@ -158,5 +161,19 @@ public class Server {
                 statusCode, statusMessage, contentType, contentLength
         );
     }
+    public static class Request {
+        private final String method;
+        private final String path;
+        private final Map<String, String> headers;
+        private final String body;
+
+        public Request(String method, String path, Map<String, String> headers, String body) {
+            this.method = method;
+            this.path = path;
+            this.headers = Collections.unmodifiableMap(new HashMap<>(headers));
+            this.body = body;
+        }
+    }
 
 }
+
