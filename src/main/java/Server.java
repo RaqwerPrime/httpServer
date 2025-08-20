@@ -66,8 +66,12 @@ public class Server {
 
     }
 
-    private void servDynamicContent(BufferedOutputStream out, int statusCode, String statusMsg) {
+    private void servDynamicContent(Path filePath, String mimeType, BufferedOutputStream out) {
 
+
+    }
+
+    private void sendErrorResponse(BufferedOutputStream out, int statusCode, String statusMessage) {
 
     }
 
