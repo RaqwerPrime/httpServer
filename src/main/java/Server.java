@@ -55,5 +55,9 @@ public class Server {
 
     }
 
+    private void servFile(String path, BufferedOutputStream out) {
+
+    }
+
 
 }
