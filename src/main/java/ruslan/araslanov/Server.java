@@ -24,6 +24,11 @@ public class Server {
         this.isRunning = false;
     }
 
+    public void addHandler() {
+
+    }
+
+
     public void listen(int port) {
         isRunning = true;
         try (final var serverSocket = new ServerSocket(port)) {
