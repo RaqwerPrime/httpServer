@@ -3,12 +3,15 @@ package ruslan.araslanov;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 
 public class Server {
@@ -83,7 +86,18 @@ public class Server {
         }
 
         final var method = parts[0];
-        final var path = parts[1];
+        final var fullPath = parts[1];
+
+        String path;
+        String queryString = null;
+        int queryIndex = fullPath.indexOf('?');
+        if (queryIndex != -1) {
+            path = fullPath.substring(0, queryIndex);
+            queryString = fullPath.substring(queryIndex + 1);
+        } else {
+            path = fullPath;
+        }
+
         final var headers = new HashMap<String, String>();
 
         String line;
@@ -108,7 +122,7 @@ public class Server {
             }
         }
 
-        return new Request(method, path, headers, body);
+        return new Request(method, path, queryString, headers, body);
     }
 
     private void processRequest(Request request, BufferedOutputStream out) throws IOException {
@@ -150,20 +164,76 @@ public class Server {
         private final String path;
         private final Map<String, String> headers;
         private final String body;
+        private final String queryString;
+        private Map<String, List<String>> queryParams;
 
-        public Request(String method, String path, Map<String, String> headers, String body) {
+        public Request(String method, String path, String queryString, Map<String, String> headers, String body) {
             this.method = method;
             this.path = path;
+            this.queryString = queryString;
             this.headers = Collections.unmodifiableMap(new HashMap<>(headers));
             this.body = body;
+            this.queryParams = parseQueryParams(queryString);
         }
 
-        public String getMethod() { return method; }
-        public String getPath() { return path; }
-        public Map<String, String> getHeaders() { return headers; }
-        public String getBody() { return body; }
-        public String getHeader(String name) { return headers.get(name); }
+        private static Map<String, List<String>> parseQueryParams(String queryString) {
+            Map<String, List<String>> params = new HashMap<>();
+
+            if (queryString != null && !queryString.isEmpty()) {
+                try {
+                    List<NameValuePair> pairs = URLEncodedUtils.parse(
+                            "?" + queryString,
+                            StandardCharsets.UTF_8
+                    );
+
+                    for (NameValuePair pair : pairs) {
+                        String name = URLDecoder.decode(pair.getName(), StandardCharsets.UTF_8);
+                        String value = URLDecoder.decode(pair.getValue(), StandardCharsets.UTF_8);
+
+                        params.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Ошибка парсинга query параметров: " + e.getMessage());
+                }
+            }
+            return Collections.unmodifiableMap(params);
+        }
+
+        public String getMethod() {
+            return method;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public Map<String, String> getHeaders() {
+            return headers;
+        }
+
+        public String getBody() {
+            return body;
+        }
+
+        public String getHeader(String name) {
+            return headers.get(name);
+        }
+
+        public String getQueryParam(String name) {
+            List<String> values = queryParams.get(name);
+            return (values != null && !values.isEmpty()) ? values.get(0) : null;
+        }
+
+        public List<String> getQueryParams(String name) {
+            return queryParams.getOrDefault(name, Collections.emptyList());
+        }
+
+        public Map<String, List<String>> getQueryParams() {
+            return queryParams;
+        }
+
     }
+
 
     @FunctionalInterface
     public interface Handler {
